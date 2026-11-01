@@ -31,7 +31,7 @@
     }
     .brand-header {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
     .brand-logo {
       display: inline-flex;
@@ -64,6 +64,19 @@
       font-size: 0.95rem;
       margin: 0;
     }
+    
+    /* Estilos para los contenedores de publicidad (Banners) */
+    .ad-banner {
+      background: #f1f5f9;
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--subtext);
+      font-size: 0.85rem;
+    }
+
     .card {
       background-color: var(--card);
       padding: 20px;
@@ -221,7 +234,6 @@
       line-height: 1.3;
     }
     
-    /* Estilo para la advertencia profesional */
     .pro-warning {
       background: #fffbeb;
       border: 1px solid #fcd34d;
@@ -257,6 +269,12 @@
     </div>
     <h1>Tu Protección Energética</h1>
     <p class="desc">Calcula tu autonomía ideal ante apagones y obtén tu receta de equipamiento.</p>
+  </div>
+
+  <!-- BANNER DE PUBLICIDAD SUPERIOR -->
+  <div class="ad-banner">
+    <span>[ Espacio Publicitario / Banner Superior ]</span>
+    <!-- Aquí puedes pegar el código script de tu proveedor de anuncios en el futuro -->
   </div>
 
   <div class="card">
@@ -354,7 +372,6 @@
 
     </div>
 
-    <!-- Advertencia profesional obligatoria -->
     <div class="pro-warning">
       <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 16h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
       <div>
@@ -364,7 +381,12 @@
 
   </div>
 
-  <!-- Contador de visitas integrado dentro del cuerpo -->
+  <!-- BANNER DE PUBLICIDAD INFERIOR -->
+  <div class="ad-banner">
+    <span>[ Espacio Publicitario / Banner Inferior ]</span>
+  </div>
+
+  <!-- Contador de visitas -->
   <div style="text-align: center; margin: 20px 0; color: var(--subtext); font-size: 0.85rem;">
     Visitas totales: <br>
     <img src="https://counter.s11.fastcounter.com/counter.php?section=voltaura" alt="Contador de visitas" style="margin-top: 5px;">
@@ -405,4 +427,74 @@
         <option value="tv_32_40" ${opcionDefault === 'tv_32_40' ? 'selected' : ''}>Pantalla LED (32" a 40") ~55W</option>
         <option value="tv_43_50" ${opcionDefault === 'tv_43_50' ? 'selected' : ''}>Pantalla LED (43" a 50") ~90W</option>
         <option value="tv_55_65" ${opcionDefault === 'tv_55_65' ? 'selected' : ''}>Pantalla LED / QLED (55" a 65") ~140W</option>
-        <option value="tv_antigua" ${opcionDefault === '
+        <option value="tv_antigua" ${opcionDefault === 'tv_antigua' ? 'selected' : ''}>Pantalla LCD / Plasma Antigua 50"+ ~160W</option>
+        <option value="foco_led" ${opcionDefault === 'foco_led' ? 'selected' : ''}>Foco LED estándar (~9W)</option>
+        <option value="refri_mediano" ${opcionDefault === 'refri_mediano' ? 'selected' : ''}>Refrigerador Doméstico (~150W)</option>
+        <option value="modem_wifi" ${opcionDefault === 'modem_wifi' ? 'selected' : ''}>Módem / Router Internet (~12W)</option>
+        <option value="ventilador" ${opcionDefault === 'ventilador' ? 'selected' : ''}>Ventilador portátil (~50W)</option>
+        <option value="laptop" ${opcionDefault === 'laptop' ? 'selected' : ''}>Laptop / Cargador (~60W)</option>
+      </select>
+      <input type="number" value="${cantDefault}" min="1" max="30" oninput="calcular()" class="inp-cant">
+      <button class="btn-del" onclick="eliminarAparato(${contadorId})">✕</button>
+    `;
+
+    contenedor.appendChild(div);
+    calcular();
+  }
+
+  function eliminarAparato(id) {
+    const el = document.getElementById('row-' + id);
+    if (el) {
+      el.remove();
+      calcular();
+    }
+  }
+
+  function actualizarHoras() {
+    document.getElementById('hrsVal').innerText = document.getElementById('horas').value;
+    calcular();
+  }
+
+  function calcular() {
+    let wattsTotales = 0;
+    const filas = document.querySelectorAll('.device-row');
+
+    filas.forEach(fila => {
+      const select = fila.querySelector('.sel-aparato');
+      const inputCant = fila.querySelector('.inp-cant');
+      
+      const clave = select.value;
+      const cant = parseFloat(inputCant.value) || 0;
+      const wattsUnitarios = catalogoWatts[clave] || 0;
+
+      wattsTotales += (wattsUnitarios * cant);
+    });
+
+    let horas = parseInt(document.getElementById('horas').value) || 1;
+    let whNecesarios = (wattsTotales * horas) / (0.85 * 0.80);
+    let ahRequeridos = Math.round(whNecesarios / 12.8);
+    let inversorW = Math.max(Math.round(wattsTotales * 1.35), 300);
+
+    let cableCalibre = "Calibre 8 AWG";
+    let breakerAmp = "Breaker DC 60A + Fusible";
+    if (inversorW > 1000) {
+      cableCalibre = "Calibre 2 AWG (Servicio Pesado)";
+      breakerAmp = "Breaker DC 150A + Fusible Mega";
+    } else if (inversorW > 500) {
+      cableCalibre = "Calibre 4 AWG (Estándar)";
+      breakerAmp = "Breaker DC 100A + Fusible Midi";
+    }
+
+    document.getElementById('resWatts').innerText = Math.round(wattsTotales) + " W";
+    document.getElementById('resWh').innerText = Math.round(whNecesarios) + " Wh";
+
+    document.getElementById('recBateria').innerText = ahRequeridos + " Ah (Litio LiFePO4 12.8V)";
+    document.getElementById('recInversor').innerText = inversorW + " W (Onda Senoidal Pura)";
+    document.getElementById('recCargador').innerText = "12V / " + Math.max(Math.round(ahRequeridos * 0.15), 10) + "A (Carga Inteligente)";
+    document.getElementById('recCable').innerText = cableCalibre;
+    document.getElementById('recBreaker').innerText = breakerAmp;
+  }
+</script>
+
+</body>
+</html>
