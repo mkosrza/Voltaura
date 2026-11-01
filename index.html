@@ -65,16 +65,15 @@
       margin: 0;
     }
     
-    /* Estilos para los contenedores de publicidad (Banners) */
+    /* Estilos para los contenedores de publicidad */
     .ad-banner {
-      background: #f1f5f9;
-      border: 2px dashed #cbd5e1;
+      background: transparent;
+      border: none;
       border-radius: 10px;
-      padding: 15px;
+      padding: 5px;
       text-align: center;
       margin-bottom: 20px;
-      color: var(--subtext);
-      font-size: 0.85rem;
+      overflow: hidden;
     }
 
     .card {
@@ -273,8 +272,16 @@
 
   <!-- BANNER DE PUBLICIDAD SUPERIOR -->
   <div class="ad-banner">
-    <span>[ Espacio Publicitario / Banner Superior ]</span>
-    <!-- Aquí puedes pegar el código script de tu proveedor de anuncios en el futuro -->
+    <script>
+      atOptions = {
+        'key' : '7bdad4bb4156b79da9ce1ab4c34a4fd5',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://bauval.org/22/7bdad4bb4156b79da9ce1ab4c34a4fd5"></script>
   </div>
 
   <div class="card">
@@ -383,7 +390,16 @@
 
   <!-- BANNER DE PUBLICIDAD INFERIOR -->
   <div class="ad-banner">
-    <span>[ Espacio Publicitario / Banner Inferior ]</span>
+    <script>
+      atOptions = {
+        'key' : '7bdad4bb4156b79da9ce1ab4c34a4fd5',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://bauval.org/22/7bdad4bb4156b79da9ce1ab4c34a4fd5"></script>
   </div>
 
   <!-- Contador de visitas -->
@@ -401,100 +417,4 @@
     "tv_32_40": 55,
     "tv_43_50": 90,
     "tv_55_65": 140,
-    "tv_antigua": 160,
-    "foco_led": 9,
-    "refri_mediano": 150,
-    "modem_wifi": 12,
-    "ventilador": 50,
-    "laptop": 60
-  };
-
-  window.onload = function() {
-    agregarAparato("tv_43_50", 1);
-    agregarAparato("foco_led", 8);
-    agregarAparato("modem_wifi", 1);
-  };
-
-  function agregarAparato(opcionDefault = "tv_43_50", cantDefault = 1) {
-    contadorId++;
-    const contenedor = document.getElementById('listaAparatos');
-    const div = document.createElement('div');
-    div.className = 'device-row';
-    div.id = 'row-' + contadorId;
-
-    div.innerHTML = `
-      <select onchange="calcular()" class="sel-aparato">
-        <option value="tv_32_40" ${opcionDefault === 'tv_32_40' ? 'selected' : ''}>Pantalla LED (32" a 40") ~55W</option>
-        <option value="tv_43_50" ${opcionDefault === 'tv_43_50' ? 'selected' : ''}>Pantalla LED (43" a 50") ~90W</option>
-        <option value="tv_55_65" ${opcionDefault === 'tv_55_65' ? 'selected' : ''}>Pantalla LED / QLED (55" a 65") ~140W</option>
-        <option value="tv_antigua" ${opcionDefault === 'tv_antigua' ? 'selected' : ''}>Pantalla LCD / Plasma Antigua 50"+ ~160W</option>
-        <option value="foco_led" ${opcionDefault === 'foco_led' ? 'selected' : ''}>Foco LED estándar (~9W)</option>
-        <option value="refri_mediano" ${opcionDefault === 'refri_mediano' ? 'selected' : ''}>Refrigerador Doméstico (~150W)</option>
-        <option value="modem_wifi" ${opcionDefault === 'modem_wifi' ? 'selected' : ''}>Módem / Router Internet (~12W)</option>
-        <option value="ventilador" ${opcionDefault === 'ventilador' ? 'selected' : ''}>Ventilador portátil (~50W)</option>
-        <option value="laptop" ${opcionDefault === 'laptop' ? 'selected' : ''}>Laptop / Cargador (~60W)</option>
-      </select>
-      <input type="number" value="${cantDefault}" min="1" max="30" oninput="calcular()" class="inp-cant">
-      <button class="btn-del" onclick="eliminarAparato(${contadorId})">✕</button>
-    `;
-
-    contenedor.appendChild(div);
-    calcular();
-  }
-
-  function eliminarAparato(id) {
-    const el = document.getElementById('row-' + id);
-    if (el) {
-      el.remove();
-      calcular();
-    }
-  }
-
-  function actualizarHoras() {
-    document.getElementById('hrsVal').innerText = document.getElementById('horas').value;
-    calcular();
-  }
-
-  function calcular() {
-    let wattsTotales = 0;
-    const filas = document.querySelectorAll('.device-row');
-
-    filas.forEach(fila => {
-      const select = fila.querySelector('.sel-aparato');
-      const inputCant = fila.querySelector('.inp-cant');
-      
-      const clave = select.value;
-      const cant = parseFloat(inputCant.value) || 0;
-      const wattsUnitarios = catalogoWatts[clave] || 0;
-
-      wattsTotales += (wattsUnitarios * cant);
-    });
-
-    let horas = parseInt(document.getElementById('horas').value) || 1;
-    let whNecesarios = (wattsTotales * horas) / (0.85 * 0.80);
-    let ahRequeridos = Math.round(whNecesarios / 12.8);
-    let inversorW = Math.max(Math.round(wattsTotales * 1.35), 300);
-
-    let cableCalibre = "Calibre 8 AWG";
-    let breakerAmp = "Breaker DC 60A + Fusible";
-    if (inversorW > 1000) {
-      cableCalibre = "Calibre 2 AWG (Servicio Pesado)";
-      breakerAmp = "Breaker DC 150A + Fusible Mega";
-    } else if (inversorW > 500) {
-      cableCalibre = "Calibre 4 AWG (Estándar)";
-      breakerAmp = "Breaker DC 100A + Fusible Midi";
-    }
-
-    document.getElementById('resWatts').innerText = Math.round(wattsTotales) + " W";
-    document.getElementById('resWh').innerText = Math.round(whNecesarios) + " Wh";
-
-    document.getElementById('recBateria').innerText = ahRequeridos + " Ah (Litio LiFePO4 12.8V)";
-    document.getElementById('recInversor').innerText = inversorW + " W (Onda Senoidal Pura)";
-    document.getElementById('recCargador').innerText = "12V / " + Math.max(Math.round(ahRequeridos * 0.15), 10) + "A (Carga Inteligente)";
-    document.getElementById('recCable').innerText = cableCalibre;
-    document.getElementById('recBreaker').innerText = breakerAmp;
-  }
-</script>
-
-</body>
-</html>
+    "tv_antigua":
